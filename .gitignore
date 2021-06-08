@@ -1,0 +1,11 @@
+vendor
+wp-content
+node_modules
+.idea
+languages/**/*.po~
+languages/all.pot
+static/entrypoints.json
+static/manifest.js*
+static/admin
+static/front
+static/apps
