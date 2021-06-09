@@ -124,7 +124,8 @@ function mergeIntoPo (datas)
             var targetItem = targetItemsByMsgId[item.msgid];
             if (! targetItem)
             {
-                throw Error('Item "' + item.msgid + '" does not exist in target PO file.');
+                console.log('Item "' + item.msgid + '" does not exist in target PO file.');
+                return ;
             }
             if (targetItem.msgid_plural !== item.msgid_plural)
             {
