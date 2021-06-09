@@ -16,7 +16,7 @@ This plugin is to help devs syncing multiple poFiles to google sheet.
 
 2. Run the command in root
 ```
-    node index.js
+    node index.js or node node_modules/project-translation/index.js
 ```
 
 ##Requirements
