@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const clientId = process.env.GOOGLE_API_BROWSER_CLIENT_ID
 const clientSecret = process.env.GOOGLE_API_SECRET_KEY
 const {OAuth2Client} = require('google-auth-library');
