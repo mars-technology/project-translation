@@ -158,7 +158,7 @@ const POT_FILENAME = "translation.pot";
                     throw Error("googleSheetUrl is not specified");
                 }
                 if (!config.outputDir) {
-                    config.outputDir = "./language";
+                    config.outputDir = "./languages";
                 }
                 if (!config.languages || config.languages.length === 0) {
                     throw Error("languages is not specified");
@@ -172,7 +172,6 @@ const POT_FILENAME = "translation.pot";
                 console.log(`
                     {
                         "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
-                        "outputDir" : "path_to_save_the_translation_files",
                         "languages" : [
                             "en_GB",
                             "fr_CA"
