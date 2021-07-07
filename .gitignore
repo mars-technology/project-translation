@@ -2,8 +2,9 @@ vendor
 wp-content
 node_modules
 .idea
-languages/**/*.po~
-languages/all.pot
+*.json
+*.php
+language
 static/entrypoints.json
 static/manifest.js*
 static/admin
