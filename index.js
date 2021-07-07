@@ -218,7 +218,7 @@ const POT_FILENAME = "translation.pot";
             });
         });
         const poFile = await loadPoFileFromPath(poFilePath);
-        langList[config.domain + "-" + poFile.headers.Language] = {
+        langList[config.domain + "-" + language] = {
             path: poFilePath,
             poFiles: [poFile]
         };
