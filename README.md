@@ -25,7 +25,7 @@ This command above will guide you through to get all the requirements, below is 
 ```
 //example translation.config.json
 {
-    "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
+    "googleSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
     "languages" : [
         "en_GB",
         ["fr_CA", "fr_BE", "fr_MA"], //if array is given, first lang will be synced to sheet, the others will take first's translations

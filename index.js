@@ -121,7 +121,7 @@ const POT_FILENAME = "translation.pot";
     }
 
     async function getPoFilesFromSheet() {
-        const googleSheetId = getIdFromUrl(config.googlSheetUrl);
+        const googleSheetId = getIdFromUrl(config.googleSheetUrl);
         if (!googleSheetId) {
             console.log("Invalid googleSheetUrl");
             process.exit();
@@ -153,7 +153,7 @@ const POT_FILENAME = "translation.pot";
         return new Promise(resolve => {
             try {
                 config = JSON.parse(fs.readFileSync('translation.config.json', 'utf8'));
-                if (!config.googlSheetUrl) {
+                if (!config.googleSheetUrl) {
                     throw Error("googleSheetUrl is not specified");
                 }
                 if (!config.outputDir) {
@@ -170,7 +170,7 @@ const POT_FILENAME = "translation.pot";
                 console.log("translation.config.json is not found/invalid, please create one like below:")
                 console.log(`
     {
-        "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
+        "googleSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
         "languages" : [
             "en_GB",
             ["fr_CA", "fr_BE", "fr_MA"], //if array is given, first lang will be synced to sheet, the others will take first's translations
