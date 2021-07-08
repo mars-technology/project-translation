@@ -69,10 +69,12 @@ const POT_FILENAME = "translation.pot";
             targetItemsByMsgId[item.msgid] = item;
             if (item.msgid.trim() !== item.msgid) { //if msgid has trailing space, we need to make sure the msgid that got trimmed by google sheet matches the key
                 const msgidWithTrailingSpace = item.msgid;
-                for (const data of sheetPo) {
-                    const itemFromSheet = data.find(itemFromSheet => itemFromSheet.msgid === msgidWithTrailingSpace.trim())
-                    if (itemFromSheet) {
-                        itemFromSheet.msgid = msgidWithTrailingSpace;
+                if (sheetPo) {
+                    for (const data of sheetPo) {
+                        const itemFromSheet = data.find(itemFromSheet => itemFromSheet.msgid === msgidWithTrailingSpace.trim())
+                        if (itemFromSheet) {
+                            itemFromSheet.msgid = msgidWithTrailingSpace;
+                        }
                     }
                 }
             }
