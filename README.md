@@ -33,6 +33,7 @@ This command above will guide you through to get all the requirements, below is 
     "domain" : "safe-wp-blocks"
 }
 ```
+The full languages list is available [here](https://wpastra.com/docs/complete-list-wordpress-locale-codes/).
 
 ## Behind the scene
 When you execute the index.js, it runs the following processes:
@@ -40,5 +41,5 @@ When you execute the index.js, it runs the following processes:
 2. Scan your source code for translations, make the pot file
 3. Make/update po file for each language from pot file
 4. Connect to google sheet and make po file for each language from the sheet
-5. Merge both po file from sheet and po file from pot
+5. Merge both po file from sheet and po file from pot, sync back the merged po file to sheet
 6. Compile po files to mo files
