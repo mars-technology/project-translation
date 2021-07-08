@@ -50,6 +50,6 @@ When you execute the index.js, it runs the following processes:
 ## To use the compiled .mo files in wordpress
 ```
 add_action('after_setup_theme', function() {
-    load_textdomain($your_domain, "./languages/" . $your_domain . "-" . get_locale() . '.mo');
+    load_textdomain($your_domain, $plugin_or_theme_root_path . "languages/" . $your_domain . "-" . get_locale() . '.mo');
 });
 ```
