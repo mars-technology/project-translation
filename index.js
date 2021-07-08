@@ -189,7 +189,7 @@ const POT_FILENAME = "translation.pot";
         potFilePath = path.join(config.outputDir, POT_FILENAME);
         try {
             await new Promise(resolve => {
-                exec(`wp i18n make-pot . ${potFilePath} --exclude=\"vendor,node_modules,public\" --domain=${config.domain}`, function(error, stdout, stderr) {
+                exec(`wp i18n make-pot . ${potFilePath} --exclude=\"vendor,node_modules,static,public,build\" --domain=${config.domain}`, function(error, stdout, stderr) {
                     if (error) {
                         console.error(error.message);
                         process.exit();
