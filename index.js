@@ -62,15 +62,14 @@ const POT_FILENAME = "translation.pot";
         });
     }
 
-    function mergeIntoPo (datas)
+    function mergeIntoPo (targetPo, sheetPo)
     {
-        var target = datas.shift();
         var targetItemsByMsgId = {};
-        target.items.forEach(function (item) {
+        targetPo.items.forEach(function (item) {
             targetItemsByMsgId[item.msgid] = item;
             if (item.msgid.trim() !== item.msgid) { //if msgid has trailing space, we need to make sure the msgid that got trimmed by google sheet matches the key
                 const msgidWithTrailingSpace = item.msgid;
-                for (const data of datas) {
+                for (const data of sheetPo) {
                     const itemFromSheet = data.find(itemFromSheet => itemFromSheet.msgid === msgidWithTrailingSpace.trim())
                     if (itemFromSheet) {
                         itemFromSheet.msgid = msgidWithTrailingSpace;
@@ -78,25 +77,24 @@ const POT_FILENAME = "translation.pot";
                 }
             }
         });
+        if (!sheetPo) {
+            return ;
+        }
 
-        datas.forEach(function (itemsToMerge) {
-            itemsToMerge.forEach(function (item) {
-                var targetItem = targetItemsByMsgId[item.msgid];
-                if (! targetItem)
-                {
-                    console.log('Item "' + item.msgid + '" does not exist in target PO file.');
-                    return ;
-                }
-                if (targetItem.msgid_plural !== item.msgid_plural)
-                {
-                    throw Error('msgid_plural mismatch for "' + item.msgid + '"');
-                }
-                targetItem.msgstr = [ item.msgstr ];
-                targetItem.flags  = item.flags;
-            });
+        sheetPo.forEach(function (item) {
+            var targetItem = targetItemsByMsgId[item.msgid];
+            if (! targetItem)
+            {
+                console.log('Item "' + item.msgid + '" does not exist in target PO file.');
+                return ;
+            }
+            if (targetItem.msgid_plural !== item.msgid_plural)
+            {
+                throw Error('msgid_plural mismatch for "' + item.msgid + '"');
+            }
+            targetItem.msgstr = [ item.msgstr ];
+            targetItem.flags  = item.flags;
         });
-
-        return Promise.resolve(target);
     }
 
     function transformRowToPoItem (row)
@@ -145,7 +143,7 @@ const POT_FILENAME = "translation.pot";
                 continue ;
             }
             const poFile = await loadPoFileFromSheet(sheet)
-            langList[sheet.title].poFiles.push(poFile);
+            langList[sheet.title].sheetPo = poFile;
             langList[sheet.title].sheet = sheet;
         }
     }
@@ -170,14 +168,16 @@ const POT_FILENAME = "translation.pot";
                 console.error(e.message);
                 console.log("translation.config.json is not found/invalid, please create one like below:")
                 console.log(`
-                    {
-                        "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
-                        "languages" : [
-                            "en_GB",
-                            "fr_CA"
-                        ],
-                        "domain" : "safe-wp-blocks"
-                    }
+    {
+        "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
+        "languages" : [
+            "en_GB",
+            ["fr_CA", "fr_BE", "fr_MA"], //if array is given, first lang will be synced to sheet, the others will take first's translations
+            "pt_PT",
+            "pt_BR",
+        ],
+        "domain" : "safe-wp-blocks"
+    }
             `);
                 process.exit();
             }
@@ -202,37 +202,51 @@ const POT_FILENAME = "translation.pot";
         }
     }
 
-    async function getPO(language) {
-        const poFilePath = path.join(config.outputDir, config.domain + "-" + language + '.po');
-        let cmd = `msginit --locale ${language} --input ${potFilePath} --output ${poFilePath}`;
-        if (fs.existsSync(poFilePath)) {
-            cmd = `msgmerge --update ${poFilePath} ${potFilePath}`
+    async function getPO(mayBeLocaleArray) {
+        let locales;
+        if (Array.isArray(mayBeLocaleArray)) {
+            locales = mayBeLocaleArray;
+        } else {
+            locales = [mayBeLocaleArray];
         }
-        await new Promise(resolve => {
-            exec(cmd, function(error, stdout, stderr) {
-                if (error) {
-                    console.error(error.message);
-                    process.exit();
-                }
-                resolve();
+        let reference = config.domain + "-" + locales[0];
+        for (const locale of locales) {
+            const poFilePath = path.join(config.outputDir, config.domain + "-" + locale + '.po');
+            let cmd = `msginit --locale ${locale} --input ${potFilePath} --output ${poFilePath}`;
+            if (fs.existsSync(poFilePath)) {
+                cmd = `msgmerge --update ${poFilePath} ${potFilePath}`
+            }
+            await new Promise(resolve => {
+                exec(cmd, function(error, stdout, stderr) {
+                    if (error) {
+                        console.error(error.message);
+                        process.exit();
+                    }
+                    resolve();
+                });
             });
-        });
-        const poFile = await loadPoFileFromPath(poFilePath);
-        langList[config.domain + "-" + language] = {
-            path: poFilePath,
-            poFiles: [poFile]
-        };
+            const poFile = await loadPoFileFromPath(poFilePath);
+            langList[config.domain + "-" + locale] = {
+                path: poFilePath,
+                potPo: poFile,
+                reference,
+            };
+        }
     }
 
     async function sync() {
         for (const lang in langList) {
             if (langList.hasOwnProperty(lang)) {
-                const translatedPo = await mergeIntoPo(langList[lang].poFiles);
-                if (translatedPo.items.length === 0) {
+                mergeIntoPo(langList[lang].potPo, langList[langList[lang].reference].sheetPo);
+                if (langList[lang].potPo.items.length === 0) {
                     continue ;
                 }
                 try {
-                    fs.writeFileSync(langList[lang].path, '' + translatedPo + '\n')
+                    fs.writeFileSync(langList[lang].path, '' + langList[lang].potPo + '\n')
+                    if (langList[lang].reference !== lang) { //skip sync to sheet if it's not a `reference` language
+                        console.log(' \x1b[32m' + lang + ".po done." + '\x1b[0m');
+                        continue ;
+                    }
                     let oldSheet = langList[lang].sheet;
                     if (oldSheet) {
                         await oldSheet.updateProperties({
@@ -241,9 +255,9 @@ const POT_FILENAME = "translation.pot";
                     }
                     const newSheet = await doc.addSheet({
                         title: lang,
-                        headerValues: Object.keys(translatedPo.items[0])
+                        headerValues: Object.keys(langList[lang].potPo.items[0])
                     });
-                    await newSheet.addRows(translatedPo.items.map(item => {
+                    await newSheet.addRows(langList[lang].potPo.items.map(item => {
                         item.flags = Object.keys(item.flags).join(', ');
                         item.extractedComments = item.extractedComments.join('\n');
                         item.references = item.references.join('\n');

@@ -5,6 +5,7 @@ node_modules
 *.json
 *.php
 language
+languages
 static/entrypoints.json
 static/manifest.js*
 static/admin

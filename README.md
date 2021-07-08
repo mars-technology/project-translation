@@ -28,10 +28,13 @@ This command above will guide you through to get all the requirements, below is 
     "googlSheetUrl" : "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxx/edit#gid=1259558084",
     "languages" : [
         "en_GB",
-        "fr_CA"
+        ["fr_CA", "fr_BE", "fr_MA"], //if array is given, first lang will be synced to sheet, the others will take first's translations
+        "pt_PT",
+        "pt_BR",
     ],
     "domain" : "safe-wp-blocks"
 }
+
 ```
 The full languages list is available [here](https://wpastra.com/docs/complete-list-wordpress-locale-codes/).
 
@@ -43,3 +46,10 @@ When you execute the index.js, it runs the following processes:
 4. Connect to google sheet and make po file for each language from the sheet
 5. Merge both po file from sheet and po file from pot, sync back the merged po file to sheet
 6. Compile po files to mo files
+
+## To use the compiled .mo files in wordpress
+```
+add_action('after_setup_theme', function() {
+    load_textdomain($your_domain, "./languages/" . $your_domain . "-" . get_locale() . '.mo');
+});
+```
